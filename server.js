@@ -20,34 +20,86 @@ let equipment = [
 ];
 
 app.get('/api/equipment', (req, res) => {
-  // TODO: Return the full equipment array.
-  res.status(501).send('Not Implemented');
+  // Return the full equipment array.
+  res.json(equipment);
 });
 
 // Keep the filter route before /:id.
 app.get('/api/equipment/filter', (req, res) => {
-  // TODO: Return equipment matching the category query.
-  res.status(501).send('Not Implemented');
+  // Return equipment matching the category query.
+  const category = req.query.category;
+
+  if (!category) { // if the category was not found, just return all equipment
+    return res.json(equipment);
+  }
+
+  // find for all matches by using the filter method and check if item category is equal to the passed category
+  const matches = equipment.filter((item) => item.category === category);
+  res.json(matches);
 });
 
 app.get('/api/equipment/:id', (req, res) => {
-  // TODO: Return the equipment at this array index.
-  res.status(501).send('Not Implemented');
+  // Return the equipment at this array index.
+  const id = Number(req.params.id); // get id via parameter
+  const item = equipment[id]; // try to access the array with the id to get the item
+
+  if (!item) { // checks if the item was found
+    return res.status(404).send('Equipment not found'); // returns 404 error with message
+  }
+
+  // returns the specific item
+  res.json(item);
 });
 
 app.post('/api/equipment', (req, res) => {
-  // TODO: Add an equipment item to the array.
-  res.status(501).send('Not Implemented');
+  // Allows for a new equipment to be added
+  const { name, category, brand, year, quantity } = req.body;
+
+  if (!name || !category) { // check if name and category were given, if not return 400 with a message
+    return res.status(400).send('name and category are required');
+  }
+
+  // create the new item 
+  const newItem = {name, category, brand, year, quantity};
+  // add it to the array
+  equipment.push(newItem);
+  // success status with new item added
+  res.status(201).json(newItem);
 });
 
 app.put('/api/equipment/:id', (req, res) => {
-  // TODO: Update the equipment at this array index.
-  res.status(501).send('Not Implemented');
+  const id = Number(req.params.id);
+
+  if (!equipment[id]) // checks if the equipment exist, if not sends not found status with message
+  {
+    return res.status(404).send('Equipment not found');
+  }
+
+  const { name, category, brand, year, quantity } = req.body;
+
+  if (!name || !category) { // validates the name and category to be mandatory - if not provided respond with bad request status error and message
+    return res.status(400).send('name and category are required');
+  }
+
+  // write the update back to the array
+  equipment[id] = { name, category, brand, year, quantity };
+
+  // returns the exact equipment
+  res.json(equipment[id]);
+
 });
 
 app.delete('/api/equipment/:id', (req, res) => {
-  // TODO: Remove the equipment at this array index.
-  res.status(501).send('Not Implemented');
+  // Remove the equipment at this array index.
+  const id = Number(req.params.id);
+
+  if (!equipment[id]) { // checks if it exists if not then return not found stauts with message
+    return res.status(404).send('Equipment not found');
+  }
+
+  // gets the removed item through splicing by the chosen id and index 1
+  const removed = equipment.splice(id, 1);
+  res.json(removed[0]); // return that in json
 });
 
 const PORT = process.env.PORT || 3000;
